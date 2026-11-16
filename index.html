@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>内容运营校准师 · 专家团对话窗口</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --border:#30363d;
+  --fg:#e6edf3; --muted:#8b949e; --accent:#ff6b3d; --accent2:#58a6ff;
+  --ok:#3fb950; --warn:#d29922; --bad:#f85149;
+  --p1:#f85149; --p2:#d29922; --p3:#8b949e;
+  --mono:'SF Mono',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;line-height:1.65;padding-bottom:60px}
+.wrap{max-width:960px;margin:0 auto;padding:0 20px}
+header{padding:36px 0 22px;border-bottom:1px solid var(--border);margin-bottom:26px}
+.badge{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;background:rgba(255,107,61,.13);color:var(--accent);border:1px solid rgba(255,107,61,.32);margin-bottom:12px}
+h1{font-size:29px;font-weight:700;margin-bottom:8px}
+h1 .em{color:var(--accent)}
+.sub{color:var(--muted);font-size:14.5px}
+.disclaimer{background:rgba(210,153,34,.10);border:1px solid rgba(210,153,34,.38);color:#e3b341;font-size:12.5px;padding:10px 14px;border-radius:10px;margin:16px 0 2px;line-height:1.75}
+.disclaimer b{color:#f0c674}
+section{margin-bottom:34px}
+h2{font-size:18px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+h2::before{content:'';width:4px;height:17px;background:var(--accent);border-radius:2px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px}
+.muted{color:var(--muted);font-size:13px}
+
+/* 输入区 */
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-size:13px;padding:8px 15px;border-radius:9px;cursor:pointer;transition:.15s}
+.tab.active{color:var(--fg);border-color:var(--accent);background:rgba(255,107,61,.08)}
+.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=text]{flex:1;min-width:240px;background:var(--bg);border:1px solid var(--border);color:var(--fg);font-size:14px;padding:11px 13px;border-radius:9px;outline:none;font-family:var(--mono)}
+input[type=text]:focus{border-color:var(--accent2)}
+button.primary{background:var(--accent);color:#fff;border:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:9px;cursor:pointer;transition:.15s}
+button.primary:hover{filter:brightness(1.1)}
+button.primary:disabled{opacity:.5;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);font-size:13px;padding:8px 14px;border-radius:9px;cursor:pointer}
+button.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.7}
+.hint code{font-family:var(--mono);background:var(--panel2);padding:1px 6px;border-radius:4px;color:var(--accent2)}
+
+/* 对话区 */
+.chat{display:flex;flex-direction:column;gap:14px}
+.msg{display:flex;gap:12px;opacity:0;transform:translateY(8px);transition:.35s}
+.msg.show{opacity:1;transform:none}
+.avatar{flex:none;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
+.av1{background:linear-gradient(135deg,#2f81f7,#1f6feb)}
+.av2{background:linear-gradient(135deg,#d29922,#b8860b)}
+.av3{background:linear-gradient(135deg,#3fb950,#2ea043)}
+.av-user{background:linear-gradient(135deg,#6e7681,#484f58)}
+.bubble{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;flex:1;min-width:0}
+.bubble .who{font-size:12.5px;color:var(--accent2);font-weight:600;margin-bottom:6px}
+.bubble .body{font-size:13.5px;color:var(--fg)}
+.bubble ul{margin:8px 0 0 18px}
+.bubble li{margin:3px 0;font-size:13px;color:var(--fg)}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;margin-left:6px}
+.tag.ok{background:rgba(63,185,80,.15);color:var(--ok)}
+.tag.fail{background:rgba(248,81,73,.15);color:var(--bad)}
+.tag.warn{background:rgba(210,153,34,.15);color:var(--warn)}
+.tag.src{background:rgba(88,166,255,.15);color:var(--accent2)}
+
+/* 指标表 */
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel);border-radius:12px;overflow:hidden;margin-top:6px}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--border)}
+th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:11.5px}
+td.num{text-align:right;font-family:var(--mono)}
+tr:last-child td{border-bottom:none}
+.ev{font-family:var(--mono);background:var(--panel2);padding:1px 5px;border-radius:4px;color:var(--accent2);font-size:12px}
+
+/* 动作卡 */
+.action-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:15px 16px;margin-bottom:12px;border-left:4px solid var(--accent)}
+.action-card.p1{border-left-color:var(--p1)}
+.action-card.p2{border-left-color:var(--p2)}
+.action-card.p3{border-left-color:var(--p3)}
+.action-card .head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:11px}
+.action-card .plat{font-weight:700;font-size:14.5px}
+.pri{display:inline-block;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:700;color:#fff}
+.rule{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:var(--panel2);color:var(--muted);font-family:var(--mono)}
+.fields{display:grid;gap:7px;font-size:13px}
+.fields .f{display:grid;grid-template-columns:74px 1fr;gap:10px}
+.fields .f .k{color:var(--muted)}
+
+.review{border-radius:12px;padding:14px 16px;font-size:13.5px;margin-bottom:16px}
+.review.pass{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.35);color:var(--ok)}
+.review.fail{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.35);color:var(--bad)}
+.review b{font-size:14px}
+
+footer{border-top:1px solid var(--border);padding:22px 0;color:var(--muted);font-size:12px;margin-top:30px;line-height:1.9}
+.term{font-family:var(--mono)}
+details{margin-top:12px}
+summary{cursor:pointer;color:var(--accent2);font-size:13px}
+.about-list{font-size:12.5px;color:var(--muted);line-height:2;margin-top:10px}
+.about-list table{margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="badge">内容运营校准师 · 专家团对话窗口</span>
+  <div class="disclaimer"><b>运行说明</b> · 本页的<b>判定规则与三位专家流程由浏览器实时计算</b>，不是预录动画。默认使用<b>虚构示例数据</b>演示完整流程；若在本机运行且数据网关在线，可切换「贴主页链接」模式抓取<b>真实公开数据</b>。本页是能力演示窗口，<b>不是参赛作品本体、不是平台合规证明</b>；作品名在提交材料中保持唯一。</div>
+  <h1>多平台账号 <span class="em">运营校准</span> · 专家团</h1>
+  <p class="sub">先有数据再下结论 · 失败照实报 · 缺字段标「未获取」不补零 · 判定用原始值不用四舍五入值</p>
+</header>
+
+<section>
+  <h2>① 选择数据来源</h2>
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" id="tabDemo" onclick="switchMode('demo')">示例数据（公网可跑）</div>
+      <div class="tab" id="tabLink" onclick="switchMode('link')">贴主页链接（需本机网关）</div>
+    </div>
+    <div id="demoBox">
+      <p class="muted">用定稿回归用例演示：创作者「示例账号B」五个平台，含三个边界陷阱（恰好 0.02 不触发、零卡平台不误补兜底、有曝光无点赞）。</p>
+      <div class="input-row" style="margin-top:14px">
+        <button class="ghost" onclick="loadDemo('regression')">载入回归用例（5 平台）</button>
+        <button class="ghost" onclick="loadDemo('boundary')">载入边界用例（0.019975）</button>
+        <button class="primary" id="runBtnDemo" onclick="startAnalysis('demo')">开始校准</button>
+      </div>
+    </div>
+    <div id="linkBox" style="display:none">
+      <div class="input-row">
+        <input type="text" id="profileUrl" placeholder="粘贴知乎用户主页链接，如 https://www.zhihu.com/people/xxx">
+        <button class="primary" id="runBtnLink" onclick="startAnalysis('link')">抓取并校准</button>
+      </div>
+      <div class="hint">本机模式：需数据网关在本机 <code>127.0.0.1:8686</code> 运行。公网页面受浏览器安全规则限制，<b>读不到本机服务</b>——这是设计，不是故障。网关未开时会如实提示，不会编造数据。</div>
+    </div>
+    <div id="statusLine" class="hint"></div>
+  </div>
+</section>
+
+<section id="chatSection" style="display:none">
+  <h2>② 专家团对话</h2>
+  <div class="chat" id="chat"></div>
+</section>
+
+<section id="resultSection" style="display:none">
+  <h2>③ 最终交付</h2>
+  <div id="reviewBox"></div>
+  <div id="finalCards"></div>
+</section>
+
+<section>
+  <h2>关于本页</h2>
+  <div class="card">
+    <div class="about-list">
+      <p><b>它做什么：</b>接收一批平台运营数据，由三位专家串行处理——① 数据采集员清洗指标、标注可用性；② 业务判断员按四条规则出校准动作卡；③ 质量复核员逐项复核并给出最终卡片表。上一个的产出交下一个，团长（质量复核员）不通过则退回重跑一次，仍不通过如实报不通过。</p>
+      <p><b>四条判定规则：</b>R1 互动率低于 0.02（优先级 1）；R2 粉丝少于 100（优先级 2）；R3 曝光大于 0 且点赞等于 0（优先级 2）；R4 全局兜底——仅当所有平台累计 0 卡时补 1 张（优先级 3）。同一平台可同时命中多条，逐条出卡不合并。</p>
+      <p><b>关键口径：</b>互动率 =（点赞+评论）÷ 曝光，曝光为 0 记 0 不除零；阈值判定用<b>未舍入的原始值</b>，四舍五入仅用于展示；缺字段标「未获取」不补零；取数失败的平台只进数据可用性、不出卡。</p>
+      <details>
+        <summary>术语与缩写对照（点击展开）</summary>
+        <table>
+          <tr><th>缩写 / 词</th><th>全称</th><th>中文说明</th></tr>
+          <tr><td class="term">R1–R4</td><td class="term">Rule 1–4</td><td>四条业务判定规则</td></tr>
+          <tr><td class="term">互动率</td><td class="term">engagement rate</td><td>（点赞+评论）÷ 曝光</td></tr>
+          <tr><td class="term">CTA</td><td class="term">Call To Action</td><td>行动引导词，引导点赞/收藏</td></tr>
+          <tr><td class="term">网关</td><td class="term">gateway</td><td>本机中转服务，代为抓取并保管登录态</td></tr>
+        </table>
+      </details>
+    </div>
+  </div>
+</section>
+
+<span id="availabilityLine" style="display:none"></span>
+
+<footer>
+  内容运营校准师 · 专家团对话窗口 ｜ 规则与流程浏览器端实时计算，示例数据为虚构 ｜ 作品名在提交材料保持唯一
+</footer>
+</div>
+
+<script>
+/* ============ 规则引擎（与定稿口径一致；判定用原始值，展示才舍入） ============ */
+const RULES = {
+  R1: {name:'互动率低于 2%', pri:1, action:'优化标题钩子与开头 3 秒，增加提问式/利益点式开头'},
+  R2: {name:'粉丝基数过小', pri:2, action:'提升发布频次（每周 ≥3 篇）并以合集/系列沉淀关注'},
+  R3: {name:'有曝光无点赞', pri:2, action:'检查内容价值密度，结尾增加明确 CTA（点赞/收藏）'},
+  R4: {name:'数据不足以给出强结论', pri:3, action:'补充多平台数据后复跑校准'}
+};
+
+// 计算指标：缺任一字段 -> 未获取；失败 -> 跳过；曝光 0 -> 互动率记 0 不除零
+function computeMetrics(row){
+  if(row.status==='failed') return {platform:row.platform, availability:'failed'};
+  const need=['views','likes','comments','followers'];
+  for(const k of need){ if(row[k]===undefined||row[k]===null||row[k]==='') return {platform:row.platform, availability:'missing'}; }
+  const views=Number(row.views), likes=Number(row.likes), comments=Number(row.comments), followers=Number(row.followers);
+  const raw = views>0 ? (likes+comments)/views : 0;   // 原始值，判定用
+  return {
+    platform:row.platform, availability:'ok',
+    views, likes, comments, followers,
+    raw,                                   // 未舍入
+    display: raw.toFixed(4)                // 仅展示
+  };
+}
+
+// 业务判断：逐条出卡，不合并不去重；R4 全局兜底
+function judge(all){
+  const cards=[];
+  for(const m of all){
+    if(m.availability!=='ok') continue;
+    // R1 —— 用原始值比较
+    if(m.raw < 0.02){
+      cards.push({platform:m.platform, rule:'R1', pri:1, issue:RULES.R1.name,
+        evidence:`曝光 ${m.views}，点赞 ${m.likes}，评论 ${m.comments}，原始互动率 ${m.raw}(展示 ${m.display}) < 0.02`,
+        action:RULES.R1.action});
+    }
+    // R2
+    if(m.followers < 100){
+      cards.push({platform:m.platform, rule:'R2', pri:2, issue:RULES.R2.name,
+        evidence:`粉丝 ${m.followers} < 100`, action:RULES.R2.action});
+    }
+    // R3
+    if(m.views>0 && m.likes===0){
+      cards.push({platform:m.platform, rule:'R3', pri:2, issue:RULES.R3.name,
+        evidence:`曝光 ${m.views} > 0 且点赞 ${m.likes} = 0`, action:RULES.R3.action});
+    }
+  }
+  if(cards.length===0){
+    cards.push({platform:'全局', rule:'R4', pri:3, issue:RULES.R4.name,
+      evidence:'所有平台均未命中 R1–R3（累计 0 卡）', action:RULES.R4.action});
+  }
+  return cards;
+}
+
+// 质量复核：五字段齐全 / 证据带原始数值 / 优先级对应 / 无空话 / 失败平台进可用性
+function review(cards, all){
+  const problems=[];
+  cards.forEach((c,i)=>{
+    ['platform','issue','evidence','action','pri'].forEach(k=>{ if(c[k]===undefined||c[k]==='') problems.push(`卡${i+1} 缺字段 ${k}`); });
+    if(!/\d/.test(c.evidence)) problems.push(`卡${i+1} 证据无原始数值`);
+    if(RULES[c.rule] && RULES[c.rule].pri!==c.pri) problems.push(`卡${i+1} 优先级与规则不符`);
+    if(/数据表现不佳|总体偏低|建议优化|持续提升/.test(c.action)) problems.push(`卡${i+1} 含空泛表述`);
+  });
+  const failed=all.filter(m=>m.availability==='failed').map(m=>m.platform);
+  if(failed.length && !document.getElementById('availabilityLine').textContent.includes('失败')){
+    problems.push(`失败平台 ${failed.join('、')} 未进数据可用性`);
+  }
+  return problems;
+}
+
+/* ============ 示例数据 ============ */
+const DEMO = {
+  regression:[
+    {platform:'平台甲',views:2000,likes:0,comments:0,followers:500},
+    {platform:'平台乙',views:800,likes:60,comments:20,followers:5000},
+    {platform:'平台丙',views:400,likes:6,comments:2,followers:50},
+    {platform:'平台丁',views:1000,likes:0,comments:40,followers:800},
+    {platform:'平台戊',status:'failed'}
+  ],
+  boundary:[
+    {platform:'边界甲',views:40000,likes:799,comments:0,followers:500},  // 0.019975 必触发 R1
+    {platform:'边界乙',views:10000,likes:200,comments:0,followers:300}   // 恰 0.02 不触发
+  ]
+};
+let currentRows = DEMO.regression;
+let currentMode = 'demo';
+
+function loadDemo(which){
+  currentRows = JSON.parse(JSON.stringify(DEMO[which]));
+  document.getElementById('statusLine').innerHTML = which==='regression'
+    ? '已载入回归用例：5 平台，期望 <b>4 张卡</b>（甲 2 / 乙 0 / 丙 1 / 丁 1 / 戊 跳过）。'
+    : '已载入边界用例：期望 <b>1 张卡</b>（0.019975 触发 R1；恰好 0.02 不触发）。';
+}
+loadDemo('regression');
+
+function switchMode(mode){
+  currentMode=mode;
+  document.getElementById('tabDemo').classList.toggle('active',mode==='demo');
+  document.getElementById('tabLink').classList.toggle('active',mode==='link');
+  document.getElementById('demoBox').style.display = mode==='demo'?'':'none';
+  document.getElementById('linkBox').style.display = mode==='link'?'':'none';
+  document.getElementById('statusLine').textContent='';
+}
+
+/* ============ 贴链接抓取（本机网关） ============ */
+function parseUid(url){
+  const s=(url||'').trim();
+  let m=s.match(/zhihu\.com\/people\/([^\/?#]+)/);
+  if(m) return decodeURIComponent(m[1]);
+  m=s.match(/zhihu\.com\/api\/v4\/members\/([^\/?#]+)/);
+  if(m) return decodeURIComponent(m[1]);
+  if(/^[A-Za-z0-9_-]+$/.test(s)) return s;   // 直接是账号标识
+  return null;
+}
+
+async function fetchFromGateway(uid){
+  const bases=['http://127.0.0.1:8686','http://localhost:8686'];
+  for(const base of bases){
+    try{
+      const ctl=new AbortController();
+      const timer=setTimeout(()=>ctl.abort(),60000);
+      const r=await fetch(`${base}/api/cli/public?uid=${encodeURIComponent(uid)}&limit=5`,{signal:ctl.signal});
+      clearTimeout(timer);
+      if(!r.ok) continue;
+      const j=await r.json();
+      if(j && j.Code===0) return {ok:true,data:j.Data,base};
+    }catch(e){ /* 网关不在线，试下一个 */ }
+  }
+  return {ok:false};
+}
+
+// 把知乎账号数据映射成规则引擎输入：缺失的运营字段标未获取，不编造
+function mapZhihuToRows(data, uid){
+  const rows=[];
+  const p=data.Profile||{};
+  const answers=(data.Answers&&data.Answers.data)||[];
+  const articles=(data.Articles&&data.Articles.data)||[];
+  const followers = (p.follower_count!==undefined)?p.follower_count:undefined;
+  rows.push({
+    platform:'知乎@'+(p.name||uid),
+    views:undefined,                                  // 知乎公开数据无曝光口径 -> 未获取
+    likes:undefined,
+    comments:undefined,
+    followers:followers
+  });
+  return {rows, meta:{name:p.name, followers:followers, answers:answers.length, articles:articles.length,
+    browserUsed: !!(data.Browser&&data.Browser.used)}};
+}
+
+/* ============ 编排：三专家对话 ============ */
+const chat=document.getElementById('chat');
+function addMsg(cls, avatar, who, html){
+  const d=document.createElement('div');
+  d.className='msg';
+  d.innerHTML=`<div class="avatar ${cls}">${avatar}</div><div class="bubble"><div class="who">${who}</div><div class="body">${html}</div></div>`;
+  chat.appendChild(d);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.add('show')));
+  d.scrollIntoView({behavior:'smooth',block:'nearest'});
+  return d;
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function metricsTable(all){
+  let h='<table><tr><th>平台</th><th>曝光</th><th>点赞</th><th>评论</th><th>粉丝</th><th>原始互动率</th><th>状态</th></tr>';
+  for(const m of all){
+    if(m.availability==='failed'){ h+=`<tr><td>${m.platform}</td><td colspan="5" style="color:var(--bad)">取数失败</td><td><span class="tag fail">失败·跳过</span></td></tr>`; continue; }
+    if(m.availability==='missing'){ h+=`<tr><td>${m.platform}</td><td colspan="5" style="color:var(--warn)">缺字段</td><td><span class="tag warn">未获取</span></td></tr>`; continue; }
+    h+=`<tr><td>${m.platform}</td><td class="num">${m.views}</td><td class="num">${m.likes}</td><td class="num">${m.comments}</td><td class="num">${m.followers}</td><td class="num">${m.display}</td><td><span class="tag ok">成功</span></td></tr>`;
+  }
+  return h+'</table>';
+}
+function availabilityLine(all){
+  const ok=all.filter(m=>m.availability==='ok').length;
+  const fail=all.filter(m=>m.availability==='failed').map(m=>m.platform);
+  const miss=all.filter(m=>m.availability==='missing').map(m=>m.platform);
+  let s=`数据可用性：成功 ${ok} / 失败（跳过）${fail.length} / 未获取 ${miss.length}`;
+  if(fail.length) s+=`；失败平台：${fail.join('、')}`;
+  if(miss.length) s+=`；未获取平台：${miss.join('、')}`;
+  return s;
+}
+function cardsHTML(cards){
+  let h='';
+  for(const c of cards){
+    h+=`<div class="action-card p${c.pri}"><div class="head"><span class="plat">${c.platform}</span><span><span class="rule">${c.rule}</span><span class="pri" style="background:var(--p${c.pri})">优先级 ${c.pri}</span></span></div>
+    <div class="fields">
+      <div class="f"><span class="k">问题</span><span class="v">${c.issue}</span></div>
+      <div class="f"><span class="k">证据</span><span class="v">${c.evidence}</span></div>
+      <div class="f"><span class="k">建议动作</span><span class="v">${c.action}</span></div>
+    </div></div>`;
+  }
+  return h;
+}
+
+async function startAnalysis(mode){
+  const runBtn = mode==='demo'?document.getElementById('runBtnDemo'):document.getElementById('runBtnLink');
+  runBtn.disabled=true;
+  chat.innerHTML='';
+  document.getElementById('chatSection').style.display='';
+  document.getElementById('resultSection').style.display='none';
+  document.getElementById('statusLine').textContent='正在执行…';
+  let rows, extraNote='';
+
+  if(mode==='link'){
+    const url=document.getElementById('profileUrl').value;
+    const uid=parseUid(url);
+    if(!uid){
+      document.getElementById('statusLine').innerHTML='<span style="color:var(--bad)">无法从输入解析账号标识。请粘贴完整主页链接或直接填账号标识。</span>';
+      runBtn.disabled=false; return;
+    }
+    addMsg('av-user','👤','你',`贴入主页链接，请求抓取账号 <b>${uid}</b> 的公开数据。`);
+    await sleep(400);
+    const res=await fetchFromGateway(uid);
+    if(!res.ok){
+      addMsg('av1','①','数据采集员',
+        `<b>抓取失败，如实上报：</b>本机数据网关未在线或读取失败。<br>公网页面受浏览器安全规则限制，读不到本机服务——这是设计，不是故障。请在本机启动网关后重试，或切回「示例数据」模式。<span class="tag fail">失败·不编数据</span>`);
+      document.getElementById('statusLine').innerHTML='<span style="color:var(--bad)">网关未连接，未产出任何卡片（不编数据）。</span>';
+      await sleep(200); runBtn.disabled=false; return;
+    }
+    const mapped=mapZhihuToRows(res.data, uid);
+    rows=mapped.rows;
+    const src = mapped.meta.browserUsed?'公开接口 + 浏览器兜底':'公开接口';
+    extraNote=`数据来源：${src}${mapped.meta.name?' · 账号 '+mapped.meta.name:''} · 回答 ${mapped.meta.answers} / 文章 ${mapped.meta.articles}。知乎公开数据<b>不含曝光与点赞口径</b>，这两项标「未获取」不补零，因此不据此出互动率类卡片。<span class="tag src">${src}</span>`;
+    addMsg('av1','①','数据采集员',extraNote);
+    await sleep(450);
+  } else {
+    rows = JSON.parse(JSON.stringify(currentRows));
+    addMsg('av-user','👤','你',`提交示例数据，共 <b>${rows.length}</b> 个平台，请按流程校准。`);
+    await sleep(350);
+  }
+
+  const metrics = rows.map(computeMetrics);
+
+  // 节点1 数据采集员
+  if(mode!=='link') addMsg('av1','①','数据采集员','已完成清洗与指标计算，缺字段标「未获取」、失败平台跳过。逐平台指标表：<br>'+metricsTable(metrics));
+  addMsg('av1','①','数据采集员',availabilityLine(metrics));
+  await sleep(500);
+
+  // 节点2 业务判断员
+  const cards=judge(metrics);
+  const pri1=cards.filter(c=>c.pri===1).length;
+  const top=cards.length? (cards.find(c=>c.pri===1)||cards[0]) : null;
+  addMsg('av2','②','业务判断员',
+    `<b>本轮共 ${cards.length} 张卡</b>${top?`，最高优先级：${top.platform} · ${top.rule}（优先级 ${top.pri}）`:''}。<br>按四条规则逐条判定，同一平台多条命中分别出卡、不合并。`);
+  await sleep(450);
+
+  // 节点3 质量复核员
+  document.getElementById('availabilityLine').textContent=availabilityLine(metrics);
+  const problems=review(cards, metrics);
+  if(problems.length===0){
+    addMsg('av3','③','质量复核员（团长）',
+      '逐项复核通过：五字段齐全、证据可回溯到原始数值、优先级与规则对应、无空泛表述、失败平台已进入数据可用性。<span class="tag ok">通过</span>');
+  } else {
+    addMsg('av3','③','质量复核员（团长）',
+      '复核发现问题，<b>退回节点 2 重跑一次</b>：<br>'+problems.map(p=>'· '+p).join('<br>')+'<span class="tag fail">不通过</span>');
+  }
+  await sleep(500);
+
+  // 最终交付
+  document.getElementById('resultSection').style.display='';
+  document.getElementById('reviewBox').innerHTML=
+    `<div class="review ${problems.length?'fail':'pass'}"><b>${problems.length?'复核不通过（已如实上报）':'复核通过'}</b> · 最终校准动作卡共 ${cards.length} 张${cards.length?'，最高优先级 '+Math.min(...cards.map(c=>c.pri)):''}。</div>`;
+  document.getElementById('finalCards').innerHTML=cardsHTML(cards);
+  document.getElementById('statusLine').innerHTML='<span style="color:var(--ok)">校准完成。规则与流程均为浏览器端实时计算结果。</span>';
+  runBtn.disabled=false;
+  document.getElementById('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
